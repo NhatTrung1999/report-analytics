@@ -1,4 +1,8 @@
+import { useState } from "react";
 import { Button, Card, Div, Input, Label, Select, Textarea } from "../ui";
+import { useAppDispatch, useAppSelector } from "../../app/hooks";
+import { fetchQuerySql } from "../../features/sqlSlice";
+import { toast } from "react-toastify";
 
 const Sidebar = ({
   sidebarHeight,
@@ -7,8 +11,26 @@ const Sidebar = ({
   sidebarHeight: number;
   sidebarWidth: number;
 }) => {
+  const { results, loading } = useAppSelector((state) => state.sql);
+  const dispatch = useAppDispatch();
+  const [textAreaVal, setTextAreaVal] = useState<string>("");
+
   //item
   const itemSidebarHeight = sidebarHeight / 4;
+
+  const handleQuery = () => {
+    if (!textAreaVal.trim()) {
+      toast.error("Please enter a SQL query.");
+      return;
+    }
+    dispatch(fetchQuerySql(textAreaVal));
+  };
+
+  const getColumns = () => {
+    if (!results || results.length === 0) return [];
+    console.log(results);
+    return Object.keys(results[0]);
+  };
 
   return (
     <div
@@ -21,42 +43,49 @@ const Sidebar = ({
         <Textarea
           className="flex-1 p-2 text-base outline-none border border-gray-300 rounded-md text-gray-500 font-medium"
           placeholder="Write your sql query..."
+          value={textAreaVal}
+          handleChange={(e) => setTextAreaVal(e.target.value)}
         />
-        <Button title="Query" />
+        <Button
+          title={loading ? "Executing..." : "Query"}
+          handleClick={handleQuery}
+        />
       </Card>
       <Card
         style={{ height: itemSidebarHeight }}
         className="flex flex-col gap-2">
         <Label label="Columns" />
         <Div className="border border-gray-300 text-gray-500 p-2 flex-1 overflow-y-auto rounded-md flex flex-col gap-2">
-          <Div className="border border-gray-200 flex items-center px-2 py-1 gap-2 rounded-md">
-            <Input
-              type="checkbox"
-              className="cursor-pointer size-4 focus:outline-none outline-none"
-            />
-            <Div className="text-base font-semibold">Product</Div>
-          </Div>
-          <Div className="border border-gray-200 flex items-center px-2 py-1 gap-2 rounded-md">
-            <Input
-              type="checkbox"
-              className="bg-gray-200 hover:bg-gray-300 cursor-pointer size-4 border border-gray-300 focus:outline-none outline-none"
-            />
-            <Div className="text-base font-semibold">Categtory</Div>
-          </Div>
-          <Div className="border border-gray-200 flex items-center px-2 py-1 gap-2 rounded-md">
-            <Input
-              type="checkbox"
-              className="bg-gray-200 hover:bg-gray-300 cursor-pointer size-4 border border-gray-300 focus:outline-none outline-none"
-            />
-            <Div className="text-base font-semibold">Quantity</Div>
-          </Div>
+          {getColumns().map((key, index) => (
+            <Div
+              className="border border-gray-200 flex items-center px-2 py-1 gap-2 rounded-md"
+              key={index}>
+              <Input
+                type="checkbox"
+                className="bg-gray-200 hover:bg-gray-300 cursor-pointer size-4 border border-gray-300 focus:outline-none outline-none"
+              />
+              <Div className="text-base font-semibold">{key}</Div>
+            </Div>
+          ))}
         </Div>
       </Card>
       <Card
         style={{ height: itemSidebarHeight }}
         className="flex flex-col gap-2">
         <Label label="Charts Columns" />
-        <Div className="border border-gray-300 text-gray-500 p-2 flex-1 overflow-y-auto rounded-md"></Div>
+        <Div className="border border-gray-300 text-gray-500 p-2 flex-1 overflow-y-auto rounded-md flex flex-col gap-2">
+          {getColumns().map((key, index) => (
+            <Div
+              className="border border-gray-200 flex items-center px-2 py-1 gap-2 rounded-md"
+              key={index}>
+              <Input
+                type="checkbox"
+                className="bg-gray-200 hover:bg-gray-300 cursor-pointer size-4 border border-gray-300 focus:outline-none outline-none"
+              />
+              <Div className="text-base font-semibold">{key}</Div>
+            </Div>
+          ))}
+        </Div>
       </Card>
       <Card
         style={{ height: itemSidebarHeight }}
