@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Card, Div, Input, Label, Select, Textarea } from "../ui";
 import { useAppDispatch, useAppSelector } from "../../app/hooks";
 import { fetchQuerySql } from "../../features/sqlSlice";
@@ -11,16 +11,22 @@ const Sidebar = ({
   sidebarHeight: number;
   sidebarWidth: number;
 }) => {
-  const { results, loading } = useAppSelector((state) => state.sql);
+  const { results, loading, error } = useAppSelector((state) => state.sql);
   const dispatch = useAppDispatch();
   const [textAreaVal, setTextAreaVal] = useState<string>("");
 
   //item
   const itemSidebarHeight = sidebarHeight / 4;
 
-  const handleQuery = () => {
+  useEffect(() => {
+    if (error) {
+      toast.error(error)
+    }
+  },[error])
+
+  const handleQuery = async () => {
     if (!textAreaVal.trim()) {
-      toast.error("Please enter a SQL query.");
+      toast.error("Please do not it blank!");
       return;
     }
     dispatch(fetchQuerySql(textAreaVal));
@@ -28,7 +34,7 @@ const Sidebar = ({
 
   const getColumns = () => {
     if (!results || results.length === 0) return [];
-    console.log(results);
+    // console.log(results);
     return Object.keys(results[0]);
   };
 

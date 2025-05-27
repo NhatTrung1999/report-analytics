@@ -15,9 +15,8 @@ export class SqlService {
       // console.log(result);
       return result;
     } catch (error) {
-      throw new BadRequestException(
-        `Query execution failed: ${error.message ?? 'Unknown error'}`,
-      );
+      const err = error as Error;
+      throw new BadRequestException(` ${err?.message ?? 'Unknown error'}`);
     }
   }
 }

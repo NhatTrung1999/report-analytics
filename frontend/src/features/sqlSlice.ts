@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 interface ResultQuerySQL {
   [key: string]: unknown;
@@ -21,10 +21,15 @@ export const fetchQuerySql = createAsyncThunk(
   "sql/fetchQuerySql",
   async (query: string, { rejectWithValue }) => {
     try {
-      const response = await axios.post(`http://192.168.18.42:3000/api/sql`, { query });
+      const response = await axios.post(`http://192.168.18.42:3000/api/sql`, {
+        query,
+      });
       return response.data;
     } catch (error) {
-      return rejectWithValue(error);
+      const err = error as AxiosError<{ message?: string }>;
+      return rejectWithValue(
+        err.response?.data?.message || "Failed to fetch SQL query results"
+      );
     }
   }
 );
